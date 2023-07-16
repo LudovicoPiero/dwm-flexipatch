@@ -201,7 +201,7 @@
 #define BAR_WINICON_PATCH 0
 
 /* Show window title in bar */
-#define BAR_WINTITLE_PATCH 1
+#define BAR_WINTITLE_PATCH 0
 
 /* Shows window titles in the bar, but only for floating clients.
  * This depends on code from the flexwintitle patch.
@@ -485,7 +485,7 @@
  * than the original ~/.dwm folder.
  * https://dwm.suckless.org/patches/autostart/
  */
-#define AUTOSTART_PATCH 0
+#define AUTOSTART_PATCH 1
 
 /* By default, windows that are not visible when requesting a resize/move will not
  * get resized/moved. With this patch, they will.
@@ -646,12 +646,6 @@
  */
 #define FOCUSDIR_PATCH 0
 
-/* When changing tags, closing windows or moving clients out of view then focus will revert to the
- * client window that remains under the mouse cursor rather than the most recently focused window.
- * https://github.com/bakkeby/patches/wiki/focusfollowmouse
- */
-#define FOCUSFOLLOWMOUSE_PATCH 0
-
 /* A simple patch that just puts focus back to the master client.
  * https://dwm.suckless.org/patches/focusmaster/
  */
@@ -734,7 +728,7 @@
  * applications that assume that the window manager is using window reparenting.
  * Refer to the ISSUES secton of the dwm man page for more details.
  */
-#define LG3D_PATCH 0
+#define LG3D_PATCH 1
 
 /* By default in dwm it is possible to make an application fullscreen, then use
  * the focusstack keybindings to focus on other windows beneath the current window.
@@ -878,7 +872,7 @@
  * monitor (default).
  * https://dwm.suckless.org/patches/pertag/
  */
-#define PERTAG_PATCH 0
+#define PERTAG_PATCH 1
 
 /* Option to enable gaps on a per tag basis rather than globally.
  * Depends on both pertag and vanitygaps patches being enabled.
@@ -1261,11 +1255,6 @@
  */
 #define TOGGLEFULLSCREEN_PATCH 0
 
-/* This patch allows for the bar position (top or bottom) to be toggled during runtime.
- * https://dwm.suckless.org/patches/toggletopbar/
- */
-#define TOGGLETOPBAR_PATCH 0
-
 /* Minor patch that lets you use the same keyboard shortcut to toggle to the previous layout if the
  * designated layout is already active.
  *
@@ -1308,13 +1297,6 @@
  * https://dwm.suckless.org/patches/unfloatvisible/
  */
 #define UNFLOATVISIBLE_PATCH 0
-
-/* This patch adds a client rule that allows for windows that do not specify the override-redirect
- * to not be managed by the window manager. This can be useful for external bars, widgets,
- * launchers, docks, desktop icons and more.
- * https://github.com/bakkeby/patches/wiki/unmanaged
- */
-#define UNMANAGED_PATCH 0
 
 /* This patch adds configurable gaps between windows differentiating between outer, inner,
  * horizontal and vertical gaps.
@@ -1406,7 +1388,7 @@
 /* Centered master layout.
  * https://dwm.suckless.org/patches/centeredmaster/
  */
-#define CENTEREDMASTER_LAYOUT 0
+#define CENTEREDMASTER_LAYOUT 1
 
 /* Centered floating master layout.
  * https://dwm.suckless.org/patches/centeredmaster/
@@ -1427,12 +1409,12 @@
 /* Fibonacci dwindle layout.
  * https://dwm.suckless.org/patches/fibonacci/
  */
-#define FIBONACCI_DWINDLE_LAYOUT 0
+#define FIBONACCI_DWINDLE_LAYOUT 1
 
 /* Fibonacci spiral layout.
  * https://dwm.suckless.org/patches/fibonacci/
  */
-#define FIBONACCI_SPIRAL_LAYOUT 0
+#define FIBONACCI_SPIRAL_LAYOUT 1
 
 /* Flextile deluxe layout.
  * A revamped, more flexible, and over-the-top version of the original flextile layout.
