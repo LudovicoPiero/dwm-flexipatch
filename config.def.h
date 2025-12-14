@@ -9,7 +9,7 @@
 /* appearance */
 #if ROUNDED_CORNERS_PATCH
 static const unsigned int borderpx       = 0;   /* border pixel of windows */
-etatic const int corner_radius           = 10;
+static const int corner_radius           = 10;
 #else
 static const unsigned int borderpx       = 2;   /* border pixel of windows */
 #endif // ROUNDED_CORNERS_PATCH
