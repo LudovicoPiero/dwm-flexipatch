@@ -35,8 +35,8 @@ FREETYPEINC = /usr/include/freetype2
 #MPDCLIENT = -lmpdclient
 
 # Uncomment for the pango patch / BAR_PANGO_PATCH
-#PANGOINC = `pkg-config --cflags xft pango pangoxft`
-#PANGOLIB = `pkg-config --libs xft pango pangoxft`
+PANGOINC = `pkg-config --cflags xft pango pangoxft`
+PANGOLIB = `pkg-config --libs xft pango pangoxft`
 
 # Uncomment for the ipc patch / IPC_PATCH
 #YAJLLIBS = -lyajl
@@ -49,7 +49,7 @@ FREETYPEINC = /usr/include/freetype2
 #XCBLIBS = -lX11-xcb -lxcb -lxcb-res
 
 # This is needed for the winicon and tagpreview patches / BAR_WINICON_PATCH / BAR_TAGPREVIEW_PATCH
-#IMLIB2LIBS = -lImlib2
+IMLIB2LIBS = -lImlib2
 
 # Uncomment for the banish patch / BANISH_PATCH (for mouse related features)
 #XILIB = `pkg-config --libs xi xfixes`

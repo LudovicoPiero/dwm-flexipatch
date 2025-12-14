@@ -1,5 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
+#include <X11/XF86keysym.h>
+
 /* Helper macros for spawning commands */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 #define CMD(...)   { .v = (const char*[]){ __VA_ARGS__, NULL } }
@@ -9,7 +11,7 @@
 static const unsigned int borderpx       = 0;   /* border pixel of windows */
 static const int corner_radius           = 10;
 #else
-static const unsigned int borderpx       = 1;   /* border pixel of windows */
+static const unsigned int borderpx       = 2;   /* border pixel of windows */
 #endif // ROUNDED_CORNERS_PATCH
 #if BAR_BORDER_PATCH
 /* This allows the bar border size to be explicitly set separately from borderpx.
@@ -60,7 +62,7 @@ static const int showtab                 = showtab_auto;        /* Default tab b
 static const int toptab                  = False;               /* False means bottom tab bar */
 #endif // TAB_PATCH
 #if BAR_HEIGHT_PATCH
-static const int bar_height              = 0;   /* 0 means derive from font, >= 1 explicit height */
+static const int bar_height              = 32;   /* 0 means derive from font, >= 1 explicit height */
 #endif // BAR_HEIGHT_PATCH
 #if BAR_PADDING_PATCH
 static const int vertpad                 = 10;  /* vertical padding of bar */
@@ -167,53 +169,54 @@ static void (*bartabmonfns[])(Monitor *) = { NULL /* , customlayoutfn */ };
 #endif // MONOCLE_LAYOUT
 #endif // BAR_TABGROUPS_PATCH
 #if BAR_PANGO_PATCH
-static const char font[]                 = "monospace 10";
+static const char font[]                 = "Iosevka 14";
 #else
-static const char *fonts[]               = { "monospace:size=10" };
+static const char *fonts[]               = { "Iosevka:size=14" };
 #endif // BAR_PANGO_PATCH
-static const char dmenufont[]            = "monospace:size=10";
+static const char dmenufont[]            = "Iosevka:size=14";
 
 static char c000000[]                    = "#000000"; // placeholder value
 
-static char normfgcolor[]                = "#bbbbbb";
-static char normbgcolor[]                = "#222222";
-static char normbordercolor[]            = "#444444";
-static char normfloatcolor[]             = "#db8fd9";
+/* Catppuccin Mocha Palette */
+static char normfgcolor[]                = "#cdd6f4"; // Text
+static char normbgcolor[]                = "#1e1e2e"; // Base
+static char normbordercolor[]            = "#313244"; // Surface0
+static char normfloatcolor[]             = "#cdd6f4"; // Text
 
-static char selfgcolor[]                 = "#eeeeee";
-static char selbgcolor[]                 = "#005577";
-static char selbordercolor[]             = "#005577";
-static char selfloatcolor[]              = "#005577";
+static char selfgcolor[]                 = "#1e1e2e"; // Base
+static char selbgcolor[]                 = "#cba6f7"; // Mauve
+static char selbordercolor[]             = "#cba6f7"; // Mauve
+static char selfloatcolor[]              = "#cba6f7"; // Mauve
 
-static char titlenormfgcolor[]           = "#bbbbbb";
-static char titlenormbgcolor[]           = "#222222";
-static char titlenormbordercolor[]       = "#444444";
-static char titlenormfloatcolor[]        = "#db8fd9";
+static char titlenormfgcolor[]           = "#cdd6f4"; // Text
+static char titlenormbgcolor[]           = "#1e1e2e"; // Base
+static char titlenormbordercolor[]       = "#313244"; // Surface0
+static char titlenormfloatcolor[]        = "#cba6f7"; // Mauve
 
-static char titleselfgcolor[]            = "#eeeeee";
-static char titleselbgcolor[]            = "#005577";
-static char titleselbordercolor[]        = "#005577";
-static char titleselfloatcolor[]         = "#005577";
+static char titleselfgcolor[]            = "#1e1e2e"; // Base
+static char titleselbgcolor[]            = "#cba6f7"; // Mauve
+static char titleselbordercolor[]        = "#cba6f7"; // Mauve
+static char titleselfloatcolor[]         = "#cba6f7"; // Mauve
 
-static char tagsnormfgcolor[]            = "#bbbbbb";
-static char tagsnormbgcolor[]            = "#222222";
-static char tagsnormbordercolor[]        = "#444444";
-static char tagsnormfloatcolor[]         = "#db8fd9";
+static char tagsnormfgcolor[]            = "#cdd6f4"; // Text
+static char tagsnormbgcolor[]            = "#1e1e2e"; // Base
+static char tagsnormbordercolor[]        = "#313244"; // Surface0
+static char tagsnormfloatcolor[]         = "#cba6f7"; // Mauve
 
-static char tagsselfgcolor[]             = "#eeeeee";
-static char tagsselbgcolor[]             = "#005577";
-static char tagsselbordercolor[]         = "#005577";
-static char tagsselfloatcolor[]          = "#005577";
+static char tagsselfgcolor[]             = "#1e1e2e"; // Base
+static char tagsselbgcolor[]             = "#cba6f7"; // Mauve
+static char tagsselbordercolor[]         = "#cba6f7"; // Mauve
+static char tagsselfloatcolor[]          = "#cba6f7"; // Mauve
 
-static char hidnormfgcolor[]             = "#005577";
-static char hidselfgcolor[]              = "#227799";
-static char hidnormbgcolor[]             = "#222222";
-static char hidselbgcolor[]              = "#222222";
+static char hidnormfgcolor[]             = "#cba6f7"; // Mauve
+static char hidselfgcolor[]              = "#89b4fa"; // Blue
+static char hidnormbgcolor[]             = "#1e1e2e"; // Base
+static char hidselbgcolor[]              = "#1e1e2e"; // Base
 
-static char urgfgcolor[]                 = "#bbbbbb";
-static char urgbgcolor[]                 = "#222222";
-static char urgbordercolor[]             = "#ff0000";
-static char urgfloatcolor[]              = "#db8fd9";
+static char urgfgcolor[]                 = "#cdd6f4"; // Text
+static char urgbgcolor[]                 = "#1e1e2e"; // Base
+static char urgbordercolor[]             = "#f38ba8"; // Red
+static char urgfloatcolor[]              = "#f38ba8"; // Red
 
 #if BAR_LTSYMBOL_SCHEME_PATCH
 static char ltsymbolfgcolor[]            = "#222222";
@@ -429,13 +432,26 @@ static const Launcher launchers[] = {
 
 #if COOL_AUTOSTART_PATCH
 static const char *const autostart[] = {
-	"st", NULL,
-	NULL /* terminate */
+    /* Set Display to 180Hz */
+    "xrandr", "--output", "HDMI-A-0", "--mode", "1920x1080", "--rate", "180.00", NULL,
+
+    /* Compositor & Notifications */
+    "picom", NULL,
+    "dunst", NULL,
+		"slstatus", NULL,
+
+    /* Keyboard Repeat Rate */
+    "xset", "r", "rate", "300", "30", NULL,
+
+		/* Fcitx5 */
+		"fcitx5", "-d", "--replace", NULL,
+
+    NULL /* terminate */
 };
 #endif // COOL_AUTOSTART_PATCH
 
 #if RENAMED_SCRATCHPADS_PATCH
-static const char *scratchpadcmd[] = {"s", "st", "-n", "spterm", NULL};
+static const char *scratchpadcmd[] = {"s", "wezterm", "start", "--class", "spterm", NULL};
 #elif SCRATCHPADS_PATCH
 const char *spcmd1[] = {"st", "-n", "spterm", "-g", "120x34", NULL };
 static Sp scratchpads[] = {
@@ -515,23 +531,79 @@ static const int tagrows = 2;
  * the patches you enable.
  */
 static const Rule rules[] = {
-	/* xprop(1):
-	 *	WM_CLASS(STRING) = instance, class
-	 *	WM_NAME(STRING) = title
-	 *	WM_WINDOW_ROLE(STRING) = role
-	 *	_NET_WM_WINDOW_TYPE(ATOM) = wintype
-	 */
-	RULE(.wintype = WTYPE "DIALOG", .isfloating = 1)
-	RULE(.wintype = WTYPE "UTILITY", .isfloating = 1)
-	RULE(.wintype = WTYPE "TOOLBAR", .isfloating = 1)
-	RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
-	RULE(.class = "Gimp", .tags = 1 << 4)
-	RULE(.class = "Firefox", .tags = 1 << 7)
-	#if RENAMED_SCRATCHPADS_PATCH
-	RULE(.instance = "spterm", .scratchkey = 's', .isfloating = 1)
-	#elif SCRATCHPADS_PATCH
-	RULE(.instance = "spterm", .tags = SPTAG(0), .isfloating = 1)
-	#endif // SCRATCHPADS_PATCH
+    /* xprop(1):
+     * WM_CLASS(STRING) = instance, class
+     * WM_NAME(STRING) = title
+     * WM_WINDOW_ROLE(STRING) = role
+     * _NET_WM_WINDOW_TYPE(ATOM) = wintype
+     */
+
+    /* --- Standard Global Rules --- */
+    RULE(.wintype = WTYPE "DIALOG", .isfloating = 1)
+    RULE(.wintype = WTYPE "UTILITY", .isfloating = 1)
+    RULE(.wintype = WTYPE "TOOLBAR", .isfloating = 1)
+    RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
+
+    /* --- Workspace 9: Email (1 << 8) --- */
+    RULE(.class = "Thunderbird", .tags = 1 << 8)
+
+    /* --- Workspace 8: Whatsapp (1 << 7) --- */
+    RULE(.class = "whatsapp-for-linux", .tags = 1 << 7)
+
+    /* --- Workspace 7: Torrent (1 << 6) --- */
+    RULE(.class = "qBittorrent", .tags = 1 << 6)
+    RULE(.class = "org.qbittorrent.qBittorrent", .tags = 1 << 6)
+
+    /* --- Workspace 6: Steam (1 << 5) --- */
+    RULE(.class = "Steam", .tags = 1 << 5)
+    RULE(.class = "steam", .tags = 1 << 5)
+    /* Floating Steam Windows */
+    RULE(.class = "Steam", .title = "Special Offers", .tags = 1 << 5, .isfloating = 1)
+    RULE(.class = "Steam", .title = "Steam - News", .tags = 1 << 5, .isfloating = 1)
+    RULE(.class = "Steam", .title = "Friends List", .tags = 1 << 5, .isfloating = 1)
+
+    /* --- Workspace 5: Media (1 << 4) --- */
+    RULE(.class = "Spotify", .tags = 1 << 4)
+    RULE(.class = "fooyin", .tags = 1 << 4)
+    RULE(.class = "tidal-hifi", .tags = 1 << 4)
+    RULE(.class = "foobar2000.exe", .tags = 1 << 4)
+
+    /* --- Workspace 4: Communication (1 << 3) --- */
+    RULE(.class = "TelegramDesktop", .tags = 1 << 3)
+    RULE(.class = "org.telegram.desktop", .tags = 1 << 3)
+    RULE(.class = "TelegramDesktop", .title = "Media viewer", .isfloating = 1)
+
+    /* --- Workspace 3: Discord/Vesktop (1 << 2) --- */
+    RULE(.class = "vesktop", .tags = 1 << 2)
+    RULE(.class = "discord", .tags = 1 << 2)
+    RULE(.class = "WebCord", .tags = 1 << 2)
+
+    /* --- Workspace 2: Browsers (1 << 1) --- */
+    RULE(.class = "firefox", .tags = 1 << 1)
+    RULE(.class = "Brave-browser", .tags = 1 << 1)
+    RULE(.class = "Chromium", .tags = 1 << 1)
+    RULE(.class = "zen", .tags = 1 << 1)
+    RULE(.class = "zen-beta", .tags = 1 << 1)
+    RULE(.class = "floorp", .tags = 1 << 1)
+
+    /* --- Workspace 1: Dev / Games (1 << 0) --- */
+    /* DWM uses substring matching, so "jetbrains" matches "jetbrains-idea" */
+    RULE(.class = "jetbrains", .tags = 1 << 0)
+    RULE(.class = "Albion-Online", .tags = 1 << 0)
+
+    /* --- Utilities / Floating --- */
+    RULE(.title = "Bitwarden Password Manager", .isfloating = 1)
+    RULE(.class = "xdg-desktop-portal-gtk", .isfloating = 1)
+
+    /* KeePassXC */
+    RULE(.class = "KeePassXC", .title = "Generate Password", .isfloating = 1)
+    RULE(.class = "KeePassXC", .title = "Browser Access Request", .isfloating = 1)
+
+    #if RENAMED_SCRATCHPADS_PATCH
+    RULE(.instance = "spterm", .scratchkey = 's', .isfloating = 1)
+    #elif SCRATCHPADS_PATCH
+    RULE(.instance = "spterm", .tags = SPTAG(0), .isfloating = 1)
+    #endif
 };
 
 #if MONITOR_RULES_PATCH
@@ -810,7 +882,7 @@ static const char *xkb_layouts[]  = {
 #endif // XKB_PATCH
 
 /* key definitions */
-#define MODKEY Mod1Mask
+#define MODKEY Mod4Mask
 #if COMBO_PATCH && SWAPTAGS_PATCH && TAGOTHERMONITOR_PATCH
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      comboview,      {.ui = 1 << TAG} }, \
@@ -907,7 +979,7 @@ static const char *dmenucmd[] = {
 	#endif // BAR_DMENUMATCHTOP_PATCH
 	NULL
 };
-static const char *termcmd[]  = { "st", NULL };
+static const char *termcmd[]  = { "wezterm", NULL };
 
 #if BAR_STATUSCMD_PATCH
 #if BAR_DWMBLOCKS_PATCH
@@ -1039,13 +1111,23 @@ ResourcePref resources[] = {
 };
 #endif // XRESOURCES_PATCH
 
+
+/* Multimedia commands */
+static const char *mediaplaypausecmd[] = { "playerctl", "play-pause", NULL };
+static const char *medianextcmd[] = { "playerctl", "next", NULL };
+static const char *mediaprevcmd[] = { "playerctl", "previous", NULL };
+static const char *mediastopcmd[] = { "playerctl", "stop", NULL };
 static const Key keys[] = {
+	{ 0, XF86XK_AudioPlay, spawn, {.v = mediaplaypausecmd } },
+  { 0, XF86XK_AudioNext, spawn, {.v = medianextcmd } },
+  { 0, XF86XK_AudioPrev, spawn, {.v = mediaprevcmd } },
+  { 0, XF86XK_AudioStop, spawn, {.v = mediastopcmd } },
 	/* modifier                     key            function                argument */
 	#if KEYMODES_PATCH
 	{ MODKEY,                       XK_Escape,     setkeymode,             {.ui = COMMANDMODE} },
 	#endif // KEYMODES_PATCH
 	{ MODKEY,                       XK_p,          spawn,                  {.v = dmenucmd } },
-	{ MODKEY|ShiftMask,             XK_Return,     spawn,                  {.v = termcmd } },
+	{ MODKEY,												XK_Return,     spawn,                  {.v = termcmd } },
 	#if RIODRAW_PATCH
 	{ MODKEY|ControlMask,           XK_p,          riospawnsync,           {.v = dmenucmd } },
 	{ MODKEY|ControlMask,           XK_Return,     riospawn,               {.v = termcmd } },
