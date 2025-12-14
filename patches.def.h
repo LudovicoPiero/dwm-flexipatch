@@ -1118,7 +1118,7 @@
 /* Allows restarting dwm without the dependency of an external script.
  * https://dwm.suckless.org/patches/selfrestart/
  */
-#define SELFRESTART_PATCH 0
+#define SELFRESTART_PATCH 1
 
 /* Floating windows being sent to another monitor will be centered.
  * https://dwm.suckless.org/patches/sendmoncenter/

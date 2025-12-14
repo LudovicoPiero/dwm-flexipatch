@@ -9,7 +9,7 @@
 /* appearance */
 #if ROUNDED_CORNERS_PATCH
 static const unsigned int borderpx       = 0;   /* border pixel of windows */
-static const int corner_radius           = 10;
+etatic const int corner_radius           = 10;
 #else
 static const unsigned int borderpx       = 2;   /* border pixel of windows */
 #endif // ROUNDED_CORNERS_PATCH
@@ -443,8 +443,14 @@ static const char *const autostart[] = {
     /* Keyboard Repeat Rate */
     "xset", "r", "rate", "300", "30", NULL,
 
+		/* Set Wallpaper */
+		"feh", "--bg-scale", "$HOME/Pictures/Wallpaper/Minato-Aqua-Dark.png", NULL,
+
 		/* Fcitx5 */
 		"fcitx5", "-d", "--replace", NULL,
+
+		/* XDG Portal Fix */
+    "/bin/sh", "-c", "$HOME/.config/dwm/scripts/xdg-portal-fix.sh", NULL,
 
     NULL /* terminate */
 };
@@ -1112,16 +1118,86 @@ ResourcePref resources[] = {
 #endif // XRESOURCES_PATCH
 
 
-/* Multimedia commands */
-static const char *mediaplaypausecmd[] = { "playerctl", "play-pause", NULL };
-static const char *medianextcmd[] = { "playerctl", "next", NULL };
-static const char *mediaprevcmd[] = { "playerctl", "previous", NULL };
-static const char *mediastopcmd[] = { "playerctl", "stop", NULL };
+/* --- Multimedia & Hardware Commands --- */
+/* Audio (wpctl) */
+static const char *upvol[]      = { "wpctl", "set-volume", "-l", "1.5", "@DEFAULT_AUDIO_SINK@", "5%+", NULL };
+static const char *downvol[]    = { "wpctl", "set-volume", "-l", "1.5", "@DEFAULT_AUDIO_SINK@", "5%-", NULL };
+static const char *mutevol[]    = { "wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle", NULL };
+static const char *mutemic[]    = { "wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle", NULL };
+
+/* Brightness (brightnessctl) */
+static const char *brighter[]   = { "brightnessctl", "-e4", "-n2", "set", "5%+", NULL };
+static const char *dimmer[]     = { "brightnessctl", "-e4", "-n2", "set", "5%-", NULL };
+
+/* Player Control (playerctl) */
+static const char *medplaypause[] = { "playerctl", "play-pause", NULL };
+static const char *mednext[]      = { "playerctl", "next", NULL };
+static const char *medprev[]      = { "playerctl", "previous", NULL };
+static const char *medstop[]      = { "playerctl", "stop", NULL };
+
+/* Applications */
+static const char *thunarcmd[]      = { "thunar", NULL };
+static const char *mailcmd[]        = { "thunderbird", NULL };
+static const char *vesktopcmd[]     = { "vesktop", NULL };
+static const char *firefoxcmd[]     = { "firefox", NULL };
+static const char *zencmd[]         = { "zen-browser", NULL };
+
+/* Utils */
+static const char *emojicmd[]       = { "rofimoji", NULL };
+
+/* Screenshots (X11 Version) */
+/* 1. OCR (requires tesseract and maim) */
+static const char *ocrcmd[]         = { "sh", "-c", "maim -s | tesseract stdin stdout | xclip -selection clipboard", NULL };
+
+/* 2. Edit Area (Flameshot is best for this on X11) */
+static const char *flameshotcmd[]   = { "flameshot", "gui", NULL };
+
+/* 3. Save Area & Copy (Native Bash Logic adapted for X11) */
+static const char *screenshotcmd[]  = { "sh", "-c",
+    "file=\"$HOME/Pictures/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\"; "
+    "maim -s | tee \"$file\" | xclip -selection clipboard -t image/png; "
+    "notify-send 'Screenshot taken' \"Saved to $file\" -i \"$file\"", NULL
+};
+
 static const Key keys[] = {
-	{ 0, XF86XK_AudioPlay, spawn, {.v = mediaplaypausecmd } },
-  { 0, XF86XK_AudioNext, spawn, {.v = medianextcmd } },
-  { 0, XF86XK_AudioPrev, spawn, {.v = mediaprevcmd } },
-  { 0, XF86XK_AudioStop, spawn, {.v = mediastopcmd } },
+		/* Audio */
+    { 0,                            XF86XK_AudioRaiseVolume, spawn,         {.v = upvol } },
+    { 0,                            XF86XK_AudioLowerVolume, spawn,         {.v = downvol } },
+    { 0,                            XF86XK_AudioMute,        spawn,         {.v = mutevol } },
+    { 0,                            XF86XK_AudioMicMute,     spawn,         {.v = mutemic } },
+
+    /* Brightness */
+    { 0,                            XF86XK_MonBrightnessUp,  spawn,         {.v = brighter } },
+    { 0,                            XF86XK_MonBrightnessDown,spawn,         {.v = dimmer } },
+
+    /* Media Player */
+    { 0,                            XF86XK_AudioPlay,        spawn,         {.v = medplaypause } },
+    { 0,                            XF86XK_AudioPause,       spawn,         {.v = medplaypause } }, /* Map Pause key to same toggle cmd */
+    { 0,                            XF86XK_AudioNext,        spawn,         {.v = mednext } },
+    { 0,                            XF86XK_AudioPrev,        spawn,         {.v = medprev } },
+    { 0,                            XF86XK_AudioStop,        spawn,         {.v = medstop } },
+
+	/* --- Applications --- */
+  { MODKEY|ShiftMask,             XK_e,      spawn,          {.v = thunarcmd } },
+  { MODKEY,                       XK_g,      spawn,          {.v = firefoxcmd } },
+  { MODKEY|ShiftMask,             XK_g,      spawn,          {.v = zencmd } },
+  { MODKEY,                       XK_m,      spawn,          {.v = mailcmd } },
+  { MODKEY,                       XK_d,      spawn,          {.v = vesktopcmd } },
+
+  /* --- Utils --- */
+  /* Greenclip is common for X11 clipboard, or just use rofi -modi clipboard */
+  /* { MODKEY,                    XK_o,      spawn,          {.v = clipboardcmd } }, */
+  { MODKEY|ShiftMask,             XK_o,      spawn,          {.v = emojicmd } },
+
+  /* --- Screenshots (X11) --- */
+  /* Print = OCR */
+  { 0,                            XK_Print,  spawn,          {.v = ocrcmd } },
+
+  /* Ctrl + Print = Edit (Flameshot) */
+  { ControlMask,                  XK_Print,  spawn,          {.v = flameshotcmd } },
+
+  /* Alt + Print = Save & Copy */
+  { Mod1Mask,                     XK_Print,  spawn,          {.v = screenshotcmd } },
 	/* modifier                     key            function                argument */
 	#if KEYMODES_PATCH
 	{ MODKEY,                       XK_Escape,     setkeymode,             {.ui = COMMANDMODE} },
@@ -1183,7 +1259,7 @@ static const Key keys[] = {
 	{ MODKEY|ControlMask,           XK_k,          pushup,                 {0} },
 	#endif // PUSH_PATCH / PUSH_NO_MASTER_PATCH
 	{ MODKEY,                       XK_i,          incnmaster,             {.i = +1 } },
-	{ MODKEY,                       XK_d,          incnmaster,             {.i = -1 } },
+	// { MODKEY,                       XK_d,          incnmaster,             {.i = -1 } },
 	#if FLEXTILE_DELUXE_LAYOUT
 	{ MODKEY|ControlMask,           XK_i,          incnstack,              {.i = +1 } },
 	{ MODKEY|ControlMask,           XK_u,          incnstack,              {.i = -1 } },
@@ -1280,7 +1356,7 @@ static const Key keys[] = {
 	{ MODKEY|ControlMask,           XK_z,          showhideclient,         {0} },
 	{ MODKEY|ControlMask,           XK_s,          unhideall,              {0} },
 	#endif // BAR_WINTITLEACTIONS_PATCH
-	{ MODKEY|ShiftMask,             XK_c,          killclient,             {0} },
+	{ MODKEY,												XK_w,          killclient,             {0} },
 	#if KILLUNSEL_PATCH
 	{ MODKEY|ShiftMask,             XK_x,          killunsel,              {0} },
 	#endif // KILLUNSEL_PATCH
@@ -1305,7 +1381,7 @@ static const Key keys[] = {
 	#endif // XRDB_PATCH | XRESOURCES_PATCH
 	{ MODKEY,                       XK_t,          setlayout,              {.v = &layouts[0]} },
 	{ MODKEY,                       XK_f,          setlayout,              {.v = &layouts[1]} },
-	{ MODKEY,                       XK_m,          setlayout,              {.v = &layouts[2]} },
+	// { MODKEY,                       XK_m,          setlayout,              {.v = &layouts[2]} },
 	#if COLUMNS_LAYOUT
 	{ MODKEY,                       XK_c,          setlayout,              {.v = &layouts[3]} },
 	#endif // COLUMNS_LAYOUT
