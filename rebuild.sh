@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
-
-# Rebuild dwm.
 set -e
 
-yes | rm config.h patches.h
+# Clean previous build artifacts
+make clean
+
+# Remove the generated headers so make regenerates them from .def.h
+rm -f config.h patches.h
+
+# Compile as a NORMAL user
+echo "Compiling..."
+make
+
+# Install as ROOT
+echo "Installing..."
 sudo make install
+
+# Notify
+echo "Build complete. Press Super+Shift+R to reload."
