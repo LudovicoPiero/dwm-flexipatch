@@ -433,7 +433,8 @@ static const Launcher launchers[] = {
 #if COOL_AUTOSTART_PATCH
 static const char *const autostart[] = {
     /* Set Display to 180Hz */
-    "xrandr", "--output", "HDMI-A-0", "--mode", "1920x1080", "--rate", "180.00", NULL,
+    "xrandr", "--output", "HDMI-A-0", "--mode", "1920x1080", "--rate", "180.00",
+    NULL,
 
     /* Compositor & Notifications */
     "picom", NULL,
@@ -443,13 +444,14 @@ static const char *const autostart[] = {
     /* Keyboard Repeat Rate */
     "xset", "r", "rate", "300", "30", NULL,
 
-		/* Set Wallpaper */
-		"feh", "--bg-scale", "$HOME/Pictures/Wallpaper/Minato-Aqua-Dark.png", NULL,
+    /* Set Wallpaper */
+    "/bin/sh", "-c", "feh --bg-scale $HOME/Pictures/Wallpaper/Minato-Aqua-Dark.png",
+    NULL,
 
-		/* Fcitx5 */
-		"fcitx5", "-d", "--replace", NULL,
+    /* Fcitx5 */
+    "fcitx5", "-d", "--replace", NULL,
 
-		/* XDG Portal Fix */
+    /* XDG Portal Fix */
     "/bin/sh", "-c", "$HOME/.config/dwm/scripts/xdg-portal-fix.sh", NULL,
 
     NULL /* terminate */
@@ -833,8 +835,11 @@ static const Layout layouts[] = {
 #else
 static const Layout layouts[] = {
 	/* symbol     arrange function */
+	#if FIBONACCI_DWINDLE_LAYOUT
+	{ "[\\]",     dwindle }, /* first entry is default */
+	#endif
 	#if TILE_LAYOUT
-	{ "[]=",      tile },    /* first entry is default */
+	{ "[]=",      tile },
 	#endif
 	{ "><>",      NULL },    /* no layout function means floating behavior */
 	#if MONOCLE_LAYOUT
@@ -860,9 +865,6 @@ static const Layout layouts[] = {
 	#endif
 	#if FIBONACCI_SPIRAL_LAYOUT
 	{ "(@)",      spiral },
-	#endif
-	#if FIBONACCI_DWINDLE_LAYOUT
-	{ "[\\]",     dwindle },
 	#endif
 	#if GRIDMODE_LAYOUT
 	{ "HHH",      grid },
@@ -1120,84 +1122,78 @@ ResourcePref resources[] = {
 
 /* --- Multimedia & Hardware Commands --- */
 /* Audio (wpctl) */
-static const char *upvol[]      = { "wpctl", "set-volume", "-l", "1.5", "@DEFAULT_AUDIO_SINK@", "5%+", NULL };
-static const char *downvol[]    = { "wpctl", "set-volume", "-l", "1.5", "@DEFAULT_AUDIO_SINK@", "5%-", NULL };
-static const char *mutevol[]    = { "wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle", NULL };
-static const char *mutemic[]    = { "wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle", NULL };
+static const char upvol[]   = "wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+";
+static const char downvol[] = "wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-";
+static const char mutevol[] = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+static const char mutemic[] = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
 
 /* Brightness (brightnessctl) */
-static const char *brighter[]   = { "brightnessctl", "-e4", "-n2", "set", "5%+", NULL };
-static const char *dimmer[]     = { "brightnessctl", "-e4", "-n2", "set", "5%-", NULL };
+static const char brighter[] = "brightnessctl -e4 -n2 set 5%+";
+static const char dimmer[]   = "brightnessctl -e4 -n2 set 5%-";
 
 /* Player Control (playerctl) */
-static const char *medplaypause[] = { "playerctl", "play-pause", NULL };
-static const char *mednext[]      = { "playerctl", "next", NULL };
-static const char *medprev[]      = { "playerctl", "previous", NULL };
-static const char *medstop[]      = { "playerctl", "stop", NULL };
+static const char medplaypause[] = "playerctl play-pause";
+static const char mednext[]      = "playerctl next";
+static const char medprev[]      = "playerctl previous";
+static const char medstop[]      = "playerctl stop";
 
 /* Applications */
-static const char *thunarcmd[]      = { "thunar", NULL };
-static const char *mailcmd[]        = { "thunderbird", NULL };
-static const char *vesktopcmd[]     = { "vesktop", NULL };
-static const char *firefoxcmd[]     = { "firefox", NULL };
-static const char *zencmd[]         = { "zen-browser", NULL };
+static const char thunarcmd[]    = "thunar";
+static const char mailcmd[]      = "thunderbird";
+static const char vesktopcmd[]   = "vesktop";
+static const char firefoxcmd[]   = "firefox";
+static const char zencmd[]       = "zen-browser";
 
 /* Utils */
-static const char *emojicmd[]       = { "rofimoji", NULL };
+static const char emojicmd[]     = "rofimoji";
 
-/* Screenshots (X11 Version) */
-/* 1. OCR (requires tesseract and maim) */
-static const char *ocrcmd[]         = { "sh", "-c", "maim -s | tesseract stdin stdout | xclip -selection clipboard", NULL };
+/* Screenshots */
+/* 1. OCR */
+static const char ocrcmd[] = "maim -s | tesseract stdin stdout | xclip -selection clipboard";
 
-/* 2. Edit Area (Flameshot is best for this on X11) */
-static const char *flameshotcmd[]   = { "flameshot", "gui", NULL };
+/* 2. Edit Area */
+static const char flameshotcmd[] = "flameshot gui";
 
-/* 3. Save Area & Copy (Native Bash Logic adapted for X11) */
-static const char *screenshotcmd[]  = { "sh", "-c",
+/* 3. Save Area & Copy */
+/* Note: SHCMD handles the quoting for us, so we can just write the command string */
+static const char screenshotcmd[] =
     "file=\"$HOME/Pictures/Screenshots/$(date +'%Y-%m-%d_%H-%M-%S').png\"; "
     "maim -s | tee \"$file\" | xclip -selection clipboard -t image/png; "
-    "notify-send 'Screenshot taken' \"Saved to $file\" -i \"$file\"", NULL
-};
+    "notify-send 'Screenshot taken' \"Saved to $file\" -i \"$file\"";
 
 static const Key keys[] = {
-		/* Audio */
-    { 0,                            XF86XK_AudioRaiseVolume, spawn,         {.v = upvol } },
-    { 0,                            XF86XK_AudioLowerVolume, spawn,         {.v = downvol } },
-    { 0,                            XF86XK_AudioMute,        spawn,         {.v = mutevol } },
-    { 0,                            XF86XK_AudioMicMute,     spawn,         {.v = mutemic } },
+  /* Audio */
+  { 0,                            XF86XK_AudioRaiseVolume, spawn,         SHCMD(upvol) },
+  { 0,                            XF86XK_AudioLowerVolume, spawn,         SHCMD(downvol) },
+  { 0,                            XF86XK_AudioMute,        spawn,         SHCMD(mutevol) },
+  { 0,                            XF86XK_AudioMicMute,     spawn,         SHCMD(mutemic) },
 
-    /* Brightness */
-    { 0,                            XF86XK_MonBrightnessUp,  spawn,         {.v = brighter } },
-    { 0,                            XF86XK_MonBrightnessDown,spawn,         {.v = dimmer } },
+  /* Brightness */
+  { 0,                            XF86XK_MonBrightnessUp,  spawn,         SHCMD(brighter) },
+  { 0,                            XF86XK_MonBrightnessDown,spawn,         SHCMD(dimmer) },
 
-    /* Media Player */
-    { 0,                            XF86XK_AudioPlay,        spawn,         {.v = medplaypause } },
-    { 0,                            XF86XK_AudioPause,       spawn,         {.v = medplaypause } }, /* Map Pause key to same toggle cmd */
-    { 0,                            XF86XK_AudioNext,        spawn,         {.v = mednext } },
-    { 0,                            XF86XK_AudioPrev,        spawn,         {.v = medprev } },
-    { 0,                            XF86XK_AudioStop,        spawn,         {.v = medstop } },
+  /* Media Player */
+  { 0,                            XF86XK_AudioPlay,        spawn,         SHCMD(medplaypause) },
+  { 0,                            XF86XK_AudioPause,       spawn,         SHCMD(medplaypause) },
+  { 0,                            XF86XK_AudioNext,        spawn,         SHCMD(mednext) },
+  { 0,                            XF86XK_AudioPrev,        spawn,         SHCMD(medprev) },
+  { 0,                            XF86XK_AudioStop,        spawn,         SHCMD(medstop) },
 
-	/* --- Applications --- */
-  { MODKEY|ShiftMask,             XK_e,      spawn,          {.v = thunarcmd } },
-  { MODKEY,                       XK_g,      spawn,          {.v = firefoxcmd } },
-  { MODKEY|ShiftMask,             XK_g,      spawn,          {.v = zencmd } },
-  { MODKEY,                       XK_m,      spawn,          {.v = mailcmd } },
-  { MODKEY,                       XK_d,      spawn,          {.v = vesktopcmd } },
+  /* Applications */
+  { MODKEY|ShiftMask,             XK_e,      spawn,          SHCMD(thunarcmd) },
+  { MODKEY,                       XK_g,      spawn,          SHCMD(firefoxcmd) },
+  { MODKEY|ShiftMask,             XK_g,      spawn,          SHCMD(zencmd) },
+  { MODKEY,                       XK_m,      spawn,          SHCMD(mailcmd) },
+  { MODKEY,                       XK_d,      spawn,          SHCMD(vesktopcmd) },
 
-  /* --- Utils --- */
-  /* Greenclip is common for X11 clipboard, or just use rofi -modi clipboard */
-  /* { MODKEY,                    XK_o,      spawn,          {.v = clipboardcmd } }, */
-  { MODKEY|ShiftMask,             XK_o,      spawn,          {.v = emojicmd } },
+  /* Utils */
+  { MODKEY|ShiftMask,             XK_o,      spawn,          SHCMD(emojicmd) },
 
-  /* --- Screenshots (X11) --- */
-  /* Print = OCR */
-  { 0,                            XK_Print,  spawn,          {.v = ocrcmd } },
+  /* Screenshots */
+  { 0,                            XK_Print,  spawn,          SHCMD(ocrcmd) },
+  { ControlMask,                  XK_Print,  spawn,          SHCMD(flameshotcmd) },
+  { Mod1Mask,                     XK_Print,  spawn,          SHCMD(screenshotcmd) },
 
-  /* Ctrl + Print = Edit (Flameshot) */
-  { ControlMask,                  XK_Print,  spawn,          {.v = flameshotcmd } },
-
-  /* Alt + Print = Save & Copy */
-  { Mod1Mask,                     XK_Print,  spawn,          {.v = screenshotcmd } },
 	/* modifier                     key            function                argument */
 	#if KEYMODES_PATCH
 	{ MODKEY,                       XK_Escape,     setkeymode,             {.ui = COMMANDMODE} },
@@ -1304,7 +1300,7 @@ static const Key keys[] = {
 	#if INSETS_PATCH
 	{ MODKEY|ShiftMask|ControlMask, XK_a,          updateinset,            {.v = &default_inset } },
 	#endif // INSETS_PATCH
-	{ MODKEY,                       XK_Return,     zoom,                   {0} },
+	{ MODKEY|ShiftMask,                       XK_Return,     zoom,                   {0} },
 	#if VANITYGAPS_PATCH
 	{ MODKEY|Mod4Mask,              XK_u,          incrgaps,               {.i = +1 } },
 	{ MODKEY|Mod4Mask|ShiftMask,    XK_u,          incrgaps,               {.i = -1 } },
