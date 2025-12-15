@@ -435,6 +435,7 @@ static const char *const autostart[] = {
     /* Set Display to 180Hz */
     "xrandr", "--output", "HDMI-A-0", "--mode", "1920x1080", "--rate", "180.00",
     NULL,
+    "xrandr", "--output", "eDP", "--off", NULL,
 
     /* Compositor & Notifications */
     "picom", NULL,
